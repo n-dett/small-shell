@@ -19,7 +19,7 @@ struct command_line *parse_input() {
     char* token = strtok(input, " \n");
     
     // If first token = #, ignore the command
-    char* firstChar = &token[0];
+    char* firstChar = strdup(&token[0]);
     if(!strcmp(firstChar, "#")) {
         exit(0);
     }
