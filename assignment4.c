@@ -17,6 +17,13 @@ struct command_line *parse_input() {
 
     // Tokenize the input
     char* token = strtok(input, " \n");
+    
+    // If first token = #, ignore the command
+    char* firstChar = &token[0];
+    if(!strcmp(firstChar, "#")) {
+        exit(0);
+    }
+
     while(token) {
         if(!strcmp(token,"<")){
             curr_command->input_file = strdup(strtok(NULL," \n"));
@@ -28,7 +35,7 @@ struct command_line *parse_input() {
             curr_command->argv[curr_command->argc++] = strdup(token);
         }
 
-        token=strtok(NULL," \n");
+        token = strtok(NULL," \n");
     }
     return curr_command;
 }
