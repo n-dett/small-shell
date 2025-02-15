@@ -20,13 +20,13 @@ struct command_line *parse_input() {
     
     // If line is blank, ignore
     if(!token) {
-        exit(0);
+        return;
     }
 
     // If first token = #, ignore the command
     char* firstChar = strdup(&token[0]);
     if(!strcmp(firstChar, "#")) {
-        exit(0);
+        return;
     }
 
     while(token) {
@@ -44,3 +44,4 @@ struct command_line *parse_input() {
     }
     return curr_command;
 }
+
