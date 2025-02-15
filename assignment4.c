@@ -18,6 +18,11 @@ struct command_line *parse_input() {
     // Tokenize the input
     char* token = strtok(input, " \n");
     
+    // If line is blank, ignore
+    if(!token) {
+        exit(0);
+    }
+
     // If first token = #, ignore the command
     char* firstChar = strdup(&token[0]);
     if(!strcmp(firstChar, "#")) {
