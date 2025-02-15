@@ -1,4 +1,4 @@
-#include <assignment4.h>
+#include "assignment4.h"
 
 int main() {
     struct command_line *curr_command;
