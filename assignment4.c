@@ -2,13 +2,13 @@
 
 
 /*
-    command_line function adapted from sample_parser.c in Programming Assignment 4: SMALLSH
+    commandLine function adapted from sample_parser.c in Programming Assignment 4: SMALLSH
     https://canvas.oregonstate.edu/courses/1987883/assignments/9864854?module_item_id=25049863
     Accessed 2/15/2025
 */
-struct command_line *parse_input() {
+struct commandLine *parse_input() {
     char input[INPUT_LENGTH];
-    struct command_line* currentCommand = (struct command_line *) calloc(1, sizeof(struct command_line));
+    struct commandLine* currentCommand = (struct commandLine *) calloc(1, sizeof(struct commandLine));
 
     // Set all argv[] values to NULL to start
     for(int i = 0; i < MAX_ARGS+1; i++) {
@@ -53,7 +53,7 @@ struct command_line *parse_input() {
 
 
 
-void cdCommand(struct command_line* command) {
+void cdCommand(struct commandLine* command) {
     // Get current working directory
     char currentWorkingDir[INPUT_LENGTH];
     getcwd(currentWorkingDir, (INPUT_LENGTH * sizeof(char)));
@@ -73,9 +73,16 @@ void cdCommand(struct command_line* command) {
 }
 
 // Prints out either the exit status or the terminating signal of the last foreground process ran by your shell
-void statusCommand(int exitOrSignalNum) {
-    printf("%d", exitOrSignalNum);
-    fflush(stdout);
+void statusCommand(int exitOrSignalNum, bool termBySignal) {
+    if(!termBySignal) {
+        // If printing exit status
+        printf("exit value %d", exitOrSignalNum);
+        fflush(stdout);
+    } else {
+        // If printing terminating signal
+        printf("terminated by signal %d", exitOrSignalNum);
+        fflush(stdout);
+    }
 }
 
 
@@ -86,27 +93,30 @@ void statusCommand(int exitOrSignalNum) {
     https://canvas.oregonstate.edu/courses/1987883/pages/exploration-process-api-creating-and-terminating-processes?module_item_id=24956218
     Accessed 2/15/2025
 */
-int newProcess() {
+void newProcess(struct commandLine* command, int* exitStatus) {
     pid_t spawnpid = -5;
-    int intVal = 10;
+
     // If fork is successful, child's spawnid = 0 and parent's spawnid = child's pid
     spawnpid = fork();
+
     switch (spawnpid){
         case -1:
+            // If fork failed
             perror("fork() failed!");
+            *exitStatus = 1;
             exit(1);
             break;
         case 0:
             // spawnpid is 0 in the child
-            intVal = intVal + 1;
-            printf("I am the child! intVal = %d\n", intVal);
+            // Run the new program in the child
+            execlp();
             break;
         default:
             // spawnpid is the pid of the child
-            intVal = intVal - 1;
-            printf("I am the parent! intVal = %d\n", intVal);
-            break;
-   }
-    printf("This statement will be executed by both of us!\n");
+            // Wait for the child process to finish
 
+            break;
+    }
+    
+    // printf("This statement will be executed by both of us!\n");
 }

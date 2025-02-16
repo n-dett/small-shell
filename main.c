@@ -1,37 +1,30 @@
 #include "assignment4.h"
 
 int main() {
-    struct command_line *currentCommand;
-    int exitStatus = 0;
+    struct commandLine *currentCommand;
+    int* exitStatus = 0;
+    bool termBySignal = false;
 
     // Parse the user input
     while(true) {
         currentCommand = parse_input();
 
-        // If currentCommand is NULL
         if(!currentCommand) {
+            // If currentCommand is NULL
             continue;
-        }
-
-        // If current command is "exit", then exit the process
-        if(!strcmp(currentCommand->argv[0], "exit")) {
-            // kill background processes first?
+        } else if(!strcmp(currentCommand->argv[0], "exit")) {
+            // If current command is "exit", then exit the process
             exit(exitStatus);
-        }
-
-        // If current command is "cd"
-        if(!strcmp(currentCommand->argv[0], "cd")) {
+        } else if(!strcmp(currentCommand->argv[0], "cd")) {
+            // If current command is "cd"
             cdCommand(currentCommand);
-        }
-
-        // If current command is "cd"
-        if(!strcmp(currentCommand->argv[0], "status")) {
-            statusCommand(exitStatus);
-        }
-
+        } else if(!strcmp(currentCommand->argv[0], "status")) {
+            statusCommand(exitStatus, termBySignal);
+        } else {
+            // If not a built-in command, start a new process
+            newProcess(currentCommand, &exitStatus);
+        } 
     }
     
     return EXIT_SUCCESS;
 }
-
-// If..then call function, return exit status

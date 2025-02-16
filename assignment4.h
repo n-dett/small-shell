@@ -15,7 +15,7 @@
     https://canvas.oregonstate.edu/courses/1987883/assignments/9864854?module_item_id=25049863
     Accessed 2/15/2025
 */
-struct command_line {
+struct commandLine {
     char* argv[MAX_ARGS + 1];
     int argc;
     char* input_file;
@@ -23,10 +23,10 @@ struct command_line {
     bool is_bg;
 };
 
-struct command_line *parse_input();
-int newProcess();
-void cdCommand(struct command_line* command);
-void statusCommand(int exitOrSignalNum);
+struct commandLine *parse_input();
+void cdCommand(struct commandLine* command);
+void statusCommand(int exitOrSignalNum, bool termBySignal);
+void newProcess(struct commandLine* currentCommand, int* exitStatus);
 
 
 
