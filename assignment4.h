@@ -24,10 +24,9 @@ struct command_line {
 };
 
 struct command_line *parse_input();
-//int newProcess();
-int cdCommand(struct command_line* command);
-
-
+int newProcess();
+void cdCommand(struct command_line* command);
+void statusCommand(int exitOrSignalNum);
 
 
 

@@ -21,7 +21,12 @@ int main() {
 
         // If current command is "cd"
         if(!strcmp(currentCommand->argv[0], "cd")) {
-            exitStatus = cdCommand(currentCommand);
+            cdCommand(currentCommand);
+        }
+
+        // If current command is "cd"
+        if(!strcmp(currentCommand->argv[0], "status")) {
+            statusCommand(exitStatus);
         }
 
     }

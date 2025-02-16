@@ -53,7 +53,7 @@ struct command_line *parse_input() {
 
 
 
-int cdCommand(struct command_line* command) {
+void cdCommand(struct command_line* command) {
     // Get current working directory
     char currentWorkingDir[INPUT_LENGTH];
     getcwd(currentWorkingDir, (INPUT_LENGTH * sizeof(char)));
@@ -72,6 +72,13 @@ int cdCommand(struct command_line* command) {
     return status;
 }
 
+// Prints out either the exit status or the terminating signal of the last foreground process ran by your shell
+void statusCommand(int exitOrSignalNum) {
+    printf("%d", exitOrSignalNum);
+    fflush(stdout);
+}
+
+
 
 
 /*
@@ -79,27 +86,27 @@ int cdCommand(struct command_line* command) {
     https://canvas.oregonstate.edu/courses/1987883/pages/exploration-process-api-creating-and-terminating-processes?module_item_id=24956218
     Accessed 2/15/2025
 */
-// int newProcess() {
-//     pid_t spawnpid = -5;
-//     int intVal = 10;
-//     // If fork is successful, child's spawnid = 0 and parent's spawnid = child's pid
-//     spawnpid = fork();
-//     switch (spawnpid){
-//         case -1:
-//             perror("fork() failed!");
-//             exit(1);
-//             break;
-//         case 0:
-//             // spawnpid is 0 in the child
-//             intVal = intVal + 1;
-//             printf("I am the child! intVal = %d\n", intVal);
-//             break;
-//         default:
-//             // spawnpid is the pid of the child
-//             intVal = intVal - 1;
-//             printf("I am the parent! intVal = %d\n", intVal);
-//             break;
-//    }
-//     printf("This statement will be executed by both of us!\n");
+int newProcess() {
+    pid_t spawnpid = -5;
+    int intVal = 10;
+    // If fork is successful, child's spawnid = 0 and parent's spawnid = child's pid
+    spawnpid = fork();
+    switch (spawnpid){
+        case -1:
+            perror("fork() failed!");
+            exit(1);
+            break;
+        case 0:
+            // spawnpid is 0 in the child
+            intVal = intVal + 1;
+            printf("I am the child! intVal = %d\n", intVal);
+            break;
+        default:
+            // spawnpid is the pid of the child
+            intVal = intVal - 1;
+            printf("I am the parent! intVal = %d\n", intVal);
+            break;
+   }
+    printf("This statement will be executed by both of us!\n");
 
-// }
+}
