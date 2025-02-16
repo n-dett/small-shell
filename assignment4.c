@@ -10,11 +10,6 @@ struct commandLine *parse_input() {
     char input[INPUT_LENGTH];
     struct commandLine* currentCommand = (struct commandLine *) calloc(1, sizeof(struct commandLine));
 
-    // Set all argv[] values to NULL to start
-    for(int i = 0; i < MAX_ARGS+1; i++) {
-        currentCommand->argv[i] = NULL;
-    }
-
     // Get input
     printf(": ");
     fflush(stdout);
@@ -63,7 +58,7 @@ void cdCommand(struct commandLine* command) {
     
     // If cd has an argument, change to that directory; else change to directory in HOME env variable
     int status;
-    if(command->argv[1]) {
+    if(command->argc > 1) {
         status = chdir(command->argv[1]);
     } else {
         status = chdir(home);
