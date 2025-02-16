@@ -104,7 +104,7 @@ void newProcess(struct commandLine* command, int* exitStatus) {
         case 0:
             // spawnpid is 0 in the child
             // Run the new program in the child
-            execlp();
+            execvp(command->argv[0], );
             break;
         default:
             // spawnpid is the pid of the child
