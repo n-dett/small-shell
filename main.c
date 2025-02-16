@@ -7,19 +7,24 @@ int main() {
     // Parse the user input
     while(true) {
         currentCommand = parse_input();
-    }
 
-    // If current command is "exit", then exit the process
-    if(!strcmp(currentCommand->argv[0], "exit")) {
-        // kill background processes first?
-        exit(exitStatus);
-    }
+        // If currentCommand is NULL
+        if(!currentCommand) {
+            continue;
+        }
 
-    // If current command is "cd"
-    if(!strcmp(currentCommand->argv[0], "cd")) {
-        exitStatus = cdCommand(currentCommand);
-    }
+        // If current command is "exit", then exit the process
+        if(!strcmp(currentCommand->argv[0], "exit")) {
+            // kill background processes first?
+            exit(exitStatus);
+        }
 
+        // If current command is "cd"
+        if(!strcmp(currentCommand->argv[0], "cd")) {
+            exitStatus = cdCommand(currentCommand);
+        }
+
+    }
     
     return EXIT_SUCCESS;
 }

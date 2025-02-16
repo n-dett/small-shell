@@ -25,13 +25,13 @@ struct command_line *parse_input() {
     
     // If line is blank, ignore
     if(!token) {
-        return 0;
+        return currentCommand = NULL;
     }
 
     // If first token = #, ignore the command
     char* firstChar = strdup(&token[0]);
     if(!strcmp(firstChar, "#")) {
-        return 0;
+        return currentCommand = NULL;
     }
 
     while(token) {
