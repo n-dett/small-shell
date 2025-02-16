@@ -10,13 +10,13 @@ int main() {
     }
 
     // If current command is "exit", then exit the process
-    if(!strcmp(currentCommand->argv, "exit")) {
+    if(!strcmp(currentCommand->argv[0], "exit")) {
         // kill background processes first?
         exit(exitStatus);
     }
 
     // If current command is "cd"
-    if(!strcmp(currentCommand->argv, "cd")) {
+    if(!strcmp(currentCommand->argv[0], "cd")) {
         exitStatus = cdCommand(currentCommand);
     }
 
