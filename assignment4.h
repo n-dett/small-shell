@@ -22,6 +22,7 @@ struct command_line {
 };
 
 struct command_line *parse_input();
+int cdCommand(struct command_line* command);
 
 
 

@@ -2,13 +2,18 @@
 
 
 /*
-    Function adapted from sample_parser.c in Programming Assignment 4: SMALLSH
+    command_line function adapted from sample_parser.c in Programming Assignment 4: SMALLSH
     https://canvas.oregonstate.edu/courses/1987883/assignments/9864854?module_item_id=25049863
     Accessed 2/15/2025
 */
 struct command_line *parse_input() {
     char input[INPUT_LENGTH];
-    struct command_line* curr_command = (struct command_line *) calloc(1, sizeof(struct command_line));
+    struct command_line* currentCommand = (struct command_line *) calloc(1, sizeof(struct command_line));
+
+    // Set all argv[] values to NULL to start
+    for(int i = 0; i < MAX_ARGS+1; i++) {
+        currentCommand->argv[i] = NULL;
+    }
 
     // Get input
     printf(": ");
@@ -31,17 +36,38 @@ struct command_line *parse_input() {
 
     while(token) {
         if(!strcmp(token,"<")){
-            curr_command->input_file = strdup(strtok(NULL," \n"));
+            currentCommand->input_file = strdup(strtok(NULL," \n"));
         } else if(!strcmp(token,">")) {
-            curr_command->output_file = strdup(strtok(NULL," \n"));
+            currentCommand->output_file = strdup(strtok(NULL," \n"));
         } else if(!strcmp(token,"&")) {
-            curr_command->is_bg = true;
+            currentCommand->is_bg = true;
         } else {
-            curr_command->argv[curr_command->argc++] = strdup(token);
+            currentCommand->argv[currentCommand->argc++] = strdup(token);
         }
 
         token = strtok(NULL," \n");
     }
-    return curr_command;
+    return currentCommand;
+}
+
+
+
+int cdCommand(struct command_line* command) {
+    // Get current working directory
+    char currentWorkingDir[INPUT_LENGTH];
+    getcwd(currentWorkingDir, (INPUT_LENGTH * sizeof(char)));
+
+    // Get HOME env variable name
+    char* home = getenv("HOME");
+    
+    // If cd has an argument, change to that directory; else change to directory in HOME env variable
+    int status;
+    if(command->argv[1]) {
+        status = chdir(command->argv[1]);
+    } else {
+        status = chdir(home);
+    }
+
+    return status;
 }
 
