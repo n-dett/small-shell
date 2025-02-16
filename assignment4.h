@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 #define INPUT_LENGTH 2048
 #define MAX_ARGS 512
 
@@ -22,18 +24,8 @@ struct command_line {
 };
 
 struct command_line *parse_input();
+//int newProcess();
 int cdCommand(struct command_line* command);
-
-
-
-
-
-
-
-
-
-
-
 
 
 
