@@ -60,9 +60,15 @@ void cdCommand(struct commandLine* command) {
     // If cd has an argument, change to that directory; else change to directory in HOME env variable
     int status;
     if(command->argc > 1) {
+        // Change directory
         chdir(command->argv[1]);
+        // Set environment PWD
+        setenv("PWD", command->argv[1], 1);
     } else {
+        // Change directory
         chdir(home);
+        // Set environment PWD
+        setenv("PWD", home, 1);
     }
 }
 
