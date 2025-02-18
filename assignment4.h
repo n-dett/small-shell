@@ -26,7 +26,7 @@ struct commandLine {
 struct commandLine *parse_input();
 void cdCommand(struct commandLine* command);
 void statusCommand(int exitOrSignalNum, bool termBySignal);
-void newProcess(struct commandLine* currentCommand, int* exitStatus);
+//void newProcess(struct commandLine* currentCommand, int* exitStatus);
 
 
 

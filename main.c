@@ -2,7 +2,8 @@
 
 int main() {
     struct commandLine *currentCommand;
-    int* exitStatus = 0;
+    int zero = 0;
+    int* exitStatus = &zero;
     bool termBySignal = false;
 
     // Parse the user input
@@ -14,16 +15,16 @@ int main() {
             continue;
         } else if(!strcmp(currentCommand->argv[0], "exit")) {
             // If current command is "exit", then exit the process
-            exit(exitStatus);
+            exit(*exitStatus);
         } else if(!strcmp(currentCommand->argv[0], "cd")) {
             // If current command is "cd"
             cdCommand(currentCommand);
         } else if(!strcmp(currentCommand->argv[0], "status")) {
-            statusCommand(exitStatus, termBySignal);
-        } else {
+            statusCommand(*exitStatus, termBySignal);
+        } //else {
             // If not a built-in command, start a new process
-            newProcess(currentCommand, &exitStatus);
-        } 
+            //newProcess(currentCommand, &exitStatus);
+       // } 
     }
     
     return EXIT_SUCCESS;

@@ -59,19 +59,17 @@ void cdCommand(struct commandLine* command) {
     // If cd has an argument, change to that directory; else change to directory in HOME env variable
     int status;
     if(command->argc > 1) {
-        status = chdir(command->argv[1]);
+        chdir(command->argv[1]);
     } else {
-        status = chdir(home);
+        chdir(home);
     }
-
-    return status;
 }
 
 // Prints out either the exit status or the terminating signal of the last foreground process ran by your shell
 void statusCommand(int exitOrSignalNum, bool termBySignal) {
     if(!termBySignal) {
         // If printing exit status
-        printf("exit value %d", exitOrSignalNum);
+        printf("exit value %d\n", exitOrSignalNum);
         fflush(stdout);
     } else {
         // If printing terminating signal
@@ -88,30 +86,30 @@ void statusCommand(int exitOrSignalNum, bool termBySignal) {
     https://canvas.oregonstate.edu/courses/1987883/pages/exploration-process-api-creating-and-terminating-processes?module_item_id=24956218
     Accessed 2/15/2025
 */
-void newProcess(struct commandLine* command, int* exitStatus) {
-    pid_t spawnpid = -5;
+// void newProcess(struct commandLine* command, int* exitStatus) {
+//     pid_t spawnpid = -5;
 
-    // If fork is successful, child's spawnid = 0 and parent's spawnid = child's pid
-    spawnpid = fork();
+//     // If fork is successful, child's spawnid = 0 and parent's spawnid = child's pid
+//     spawnpid = fork();
 
-    switch (spawnpid){
-        case -1:
-            // If fork failed
-            perror("fork() failed!");
-            *exitStatus = 1;
-            exit(1);
-            break;
-        case 0:
-            // spawnpid is 0 in the child
-            // Run the new program in the child
-            execvp(command->argv[0], );
-            break;
-        default:
-            // spawnpid is the pid of the child
-            // Wait for the child process to finish
+//     switch (spawnpid){
+//         case -1:
+//             // If fork failed
+//             perror("fork() failed!");
+//             *exitStatus = 1;
+//             exit(1);
+//             break;
+//         case 0:
+//             // spawnpid is 0 in the child
+//             // Run the new program in the child
+//             execvp(command->argv[0], );
+//             break;
+//         default:
+//             // spawnpid is the pid of the child
+//             // Wait for the child process to finish
 
-            break;
-    }
+//             break;
+//     }
     
-    // printf("This statement will be executed by both of us!\n");
-}
+//     // printf("This statement will be executed by both of us!\n");
+// }
