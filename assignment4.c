@@ -24,7 +24,7 @@ struct commandLine *parse_input() {
     }
 
     // If first token = #, ignore the command
-    char* firstChar = strdup(&token[0]);
+    char* firstChar = strndup(token, 1);
     if(!strcmp(firstChar, "#")) {
         return currentCommand = NULL;
     }
