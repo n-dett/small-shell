@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #define INPUT_LENGTH 2048
 #define MAX_ARGS 512
@@ -26,8 +27,7 @@ struct commandLine {
 struct commandLine *parse_input();
 void cdCommand(struct commandLine* command);
 void statusCommand(int exitOrSignalNum, bool termBySignal);
-//void newProcess(struct commandLine* currentCommand, int* exitStatus);
-
+void newProcess(struct commandLine* currentCommand, int* exitStatus);
 
 
 

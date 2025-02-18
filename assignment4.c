@@ -46,8 +46,9 @@ struct commandLine *parse_input() {
 }
 
 
-
-
+/*
+Handles cd command
+*/
 void cdCommand(struct commandLine* command) {
     // Get current working directory
     char currentWorkingDir[INPUT_LENGTH];
@@ -64,6 +65,7 @@ void cdCommand(struct commandLine* command) {
         chdir(home);
     }
 }
+
 
 // Prints out either the exit status or the terminating signal of the last foreground process ran by your shell
 void statusCommand(int exitOrSignalNum, bool termBySignal) {
@@ -82,34 +84,42 @@ void statusCommand(int exitOrSignalNum, bool termBySignal) {
 
 
 /*
+    Starts a new process using a non-built-in command
     Adapted from CS374 Exploration: Process API – Creating and Terminating Processes
     https://canvas.oregonstate.edu/courses/1987883/pages/exploration-process-api-creating-and-terminating-processes?module_item_id=24956218
+    and
+    Exploration: Process API - Executing a New Program
+    https://canvas.oregonstate.edu/courses/1987883/pages/exploration-process-api-executing-a-new-program?module_item_id=24956220
     Accessed 2/15/2025
 */
-// void newProcess(struct commandLine* command, int* exitStatus) {
-//     pid_t spawnpid = -5;
+void newProcess(struct commandLine* command, int* exitStatus) {
+    pid_t spawnPid = -5;
+    int childStatus;
 
-//     // If fork is successful, child's spawnid = 0 and parent's spawnid = child's pid
-//     spawnpid = fork();
+    // If fork is successful, child's spawnid = 0 and parent's spawnid = child's pid
+    spawnPid = fork();
 
-//     switch (spawnpid){
-//         case -1:
-//             // If fork failed
-//             perror("fork() failed!");
-//             *exitStatus = 1;
-//             exit(1);
-//             break;
-//         case 0:
-//             // spawnpid is 0 in the child
-//             // Run the new program in the child
-//             execvp(command->argv[0], );
-//             break;
-//         default:
-//             // spawnpid is the pid of the child
-//             // Wait for the child process to finish
-
-//             break;
-//     }
+    switch (spawnPid){
+        case -1:
+            // If fork failed
+            perror("fork() failed!");
+            break;
+        case 0:
+            // spawnpid is 0 in the child
+            // Run the new program in the child
+            execvp(command->argv[0], command->argv);
+            // If there is an error
+            perror("badfile: no such file or directory");
+            *exitStatus = 1;
+            exit(1);
+            break;
+        default:
+            // spawnpid is the pid of the child
+            // Wait for the child process to finish
+            spawnPid = waitpid(spawnPid, &childStatus, 0);
+            *exitStatus = 0;
+            exit(0);
+            break;
+    }
     
-//     // printf("This statement will be executed by both of us!\n");
-// }
+}

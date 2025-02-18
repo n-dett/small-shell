@@ -21,10 +21,10 @@ int main() {
             cdCommand(currentCommand);
         } else if(!strcmp(currentCommand->argv[0], "status")) {
             statusCommand(*exitStatus, termBySignal);
-        } //else {
+        } else {
             // If not a built-in command, start a new process
-            //newProcess(currentCommand, &exitStatus);
-       // } 
+            newProcess(currentCommand, exitStatus);
+        } 
     }
     
     return EXIT_SUCCESS;
