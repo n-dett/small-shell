@@ -93,10 +93,15 @@ void statusCommand(int exitOrSignalNum, bool termBySignal) {
     Starts a new process using a non-built-in command
     Adapted from CS374 Exploration: Process API – Creating and Terminating Processes
     https://canvas.oregonstate.edu/courses/1987883/pages/exploration-process-api-creating-and-terminating-processes?module_item_id=24956218
+    Accessed 2/15/2025
     and
     Exploration: Process API - Executing a New Program
     https://canvas.oregonstate.edu/courses/1987883/pages/exploration-process-api-executing-a-new-program?module_item_id=24956220
     Accessed 2/15/2025
+    and
+    Exploration: Processes and I/O
+    https://canvas.oregonstate.edu/courses/1987883/pages/exploration-processes-and-i-slash-o?module_item_id=24956228
+    Accessed 2/17/2025
 */
 void newProcess(struct commandLine* command, int* exitStatus) {
     pid_t spawnPid = -5;
@@ -104,6 +109,8 @@ void newProcess(struct commandLine* command, int* exitStatus) {
 
     // If fork is successful, child's spawnid = 0 and parent's spawnid = child's pid
     spawnPid = fork();
+    char output[] = ">";
+    char input[] = "<";
 
     switch (spawnPid){
         case -1:
@@ -112,10 +119,50 @@ void newProcess(struct commandLine* command, int* exitStatus) {
             break;
         case 0:
             // spawnpid is 0 in the child
+
+            // command->inputFile, command->outputFile
+            // search command for < or >
+
+            // If argv[1] is >, redirect output of the file in argv[i+1]
+            if(!strcmp(command->argv[1], output)) {
+                // Open the file
+                int fileDesc = open(command->argv[2], O_WRONLY | O_CREAT | O_TRUNC, 0640);
+                if (fileDesc == -1) {
+                    perror(command->argv[1]);
+                    exit(1);
+                }
+
+                // Redirect stdout to file
+                int result = dup2(fileDesc, 1);
+                if (result == -1) { 
+                    perror("source dup2()"); 
+                    exit(2); 
+                }
+            }
+
+            // If argv[1] or arg[3] is <, redirect input of the file in argv[i+1]
+            
+            if(!strcmp(command->argv[1], input)) {
+                // Open the file
+                int fileDesc = open(command->argv[2], O_RDONLY, 0640);
+                if (fileDesc == -1) {
+                  perror(command->argv[1]);
+                  exit(1);
+                }
+
+                // Redirect stdin to file
+                int result = dup2(fileDesc, 0);
+                if (result == -1) { 
+                    perror("source dup2()"); 
+                    exit(2); 
+                }
+            }
+            
             // Run the new program in the child
             execvp(command->argv[0], command->argv);
+
             // If there is an error
-            perror("badfile: no such file or directory");
+            perror(command->argv[0]);
             *exitStatus = 1;
             exit(1);
             break;
@@ -123,8 +170,6 @@ void newProcess(struct commandLine* command, int* exitStatus) {
             // spawnpid is the pid of the child
             // Wait for the child process to finish
             spawnPid = waitpid(spawnPid, &childStatus, 0);
-            *exitStatus = 0;
-            //exit(0);
             break;
     }
     
