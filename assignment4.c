@@ -124,7 +124,7 @@ void newProcess(struct commandLine* command, int* exitStatus) {
             // Wait for the child process to finish
             spawnPid = waitpid(spawnPid, &childStatus, 0);
             *exitStatus = 0;
-            exit(0);
+            //exit(0);
             break;
     }
     
