@@ -16,10 +16,10 @@ int main() {
         } else if(!strcmp(currentCommand->argv[0], "exit")) {
             // If current command is "exit", then exit the process
             exit(*exitStatus);
-        } else if(!strcmp(currentCommand->argv[0], "cd")) {
+        } else if(!strncmp(currentCommand->argv[0], "cd", 2)) {
             // If current command is "cd"
             cdCommand(currentCommand);
-        } else if(!strcmp(currentCommand->argv[0], "status")) {
+        } else if(!strncmp(currentCommand->argv[0], "status", 6)) {
             statusCommand(*exitStatus, termBySignal);
         } else {
             // If not a built-in command, start a new process
