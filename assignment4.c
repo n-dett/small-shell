@@ -165,14 +165,20 @@ void newProcess(struct commandLine* command, int* exitStatus) {
             execvp(command->argv[0], command->argv);
 
             // If there is an error
-            perror(command->argv[0]);
             *exitStatus = 1;
+            perror(command->argv[0]);
             exit(1);
             break;
         default:
             // spawnpid is the pid of the child
             // Wait for the child process to finish
             spawnPid = waitpid(spawnPid, &childStatus, 0);
+
+            // If childStatus is not 0, set exitStatus to 1
+            if(childStatus != 0) {
+                *exitStatus = 1;
+            }
+            
             break;
     }
     
