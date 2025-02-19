@@ -129,6 +129,7 @@ void newProcess(struct commandLine* command, int* exitStatus) {
                 int fileDesc = open(command->output_file, O_WRONLY | O_CREAT | O_TRUNC, 0640);
                 if (fileDesc == -1) {
                     *exitStatus = 1;
+                    childStatus = 1;
                     perror(command->output_file);
                     exit(1);
                 }
@@ -137,6 +138,7 @@ void newProcess(struct commandLine* command, int* exitStatus) {
                 int result = dup2(fileDesc, 1);
                 if (result == -1) { 
                     *exitStatus = 2;
+                    childStatus = 2;
                     perror("source dup2()"); 
                     exit(2); 
                 }
@@ -148,6 +150,7 @@ void newProcess(struct commandLine* command, int* exitStatus) {
                 int fileDesc = open(command->input_file, O_RDONLY, 0640);
                 if (fileDesc == -1) {
                   *exitStatus = 1;
+                  childStatus = 1;
                   perror(command->input_file);
                   exit(1);
                 }
@@ -156,6 +159,7 @@ void newProcess(struct commandLine* command, int* exitStatus) {
                 int result = dup2(fileDesc, 0);
                 if (result == -1) { 
                     *exitStatus = 2;
+                    childStatus = 2;
                     perror("source dup2()"); 
                     exit(2); 
                 }
@@ -167,6 +171,7 @@ void newProcess(struct commandLine* command, int* exitStatus) {
             // If there is an error
             perror(command->argv[0]);
             *exitStatus = 1;
+            childStatus = 1;
             exit(1);
             break;
         default:
