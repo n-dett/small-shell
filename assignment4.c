@@ -15,6 +15,10 @@ struct commandLine *parse_input() {
     fflush(stdout);
     fgets(input, INPUT_LENGTH, stdin);
 
+    // Set files to NULL to start
+    currentCommand->output_file = NULL;
+    currentCommand->input_file = NULL;
+
     // Tokenize the input
     char* token = strtok(input, " \n");
     
@@ -119,16 +123,12 @@ void newProcess(struct commandLine* command, int* exitStatus) {
             break;
         case 0:
             // spawnpid is 0 in the child
-
-            // command->inputFile, command->outputFile
-            // search command for < or >
-
-            // If argv[1] is >, redirect output of the file in argv[i+1]
-            if(!strcmp(command->argv[1], output)) {
+            // If argv has an output file, then redirect output
+            if(command->output_file) {
                 // Open the file
-                int fileDesc = open(command->argv[2], O_WRONLY | O_CREAT | O_TRUNC, 0640);
+                int fileDesc = open(command->output_file, O_WRONLY | O_CREAT | O_TRUNC, 0640);
                 if (fileDesc == -1) {
-                    perror(command->argv[1]);
+                    perror(command->output_file);
                     exit(1);
                 }
 
@@ -140,13 +140,12 @@ void newProcess(struct commandLine* command, int* exitStatus) {
                 }
             }
 
-            // If argv[1] or arg[3] is <, redirect input of the file in argv[i+1]
-            
-            if(!strcmp(command->argv[1], input)) {
+            // If argv has an input file, then redirect output
+            if(command->input_file) {
                 // Open the file
-                int fileDesc = open(command->argv[2], O_RDONLY, 0640);
+                int fileDesc = open(command->input_file, O_RDONLY, 0640);
                 if (fileDesc == -1) {
-                  perror(command->argv[1]);
+                  perror(command->input_file);
                   exit(1);
                 }
 
