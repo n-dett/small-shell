@@ -254,6 +254,7 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
                 *termBySignal = false;
                 *exitStatus = WEXITSTATUS(childStatus);
             } else {
+                // print signal message here
                 *termBySignal = true;
                 *signalNum = WTERMSIG(childStatus);
             }
