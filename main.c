@@ -25,7 +25,7 @@ int main() {
             statusCommand(*exitStatus, *signalNum, *termBySignal);
         } else {
             // If not a built-in command, start a new process
-            newProcess(currentCommand, exitStatus, termBySignal);
+            newProcess(currentCommand, exitStatus, termBySignal, signalNum);
         } 
     }
     

@@ -85,7 +85,7 @@ void statusCommand(int exitNum, int signalNum, bool termBySignal) {
         fflush(stdout);
     } else {
         // If printing terminating signal
-        printf("terminated by signal %d", signalNum);
+        printf("terminated by signal %d\n", signalNum);
         fflush(stdout);
     }
 }
@@ -107,9 +107,14 @@ void statusCommand(int exitNum, int signalNum, bool termBySignal) {
     https://canvas.oregonstate.edu/courses/1987883/pages/exploration-processes-and-i-slash-o?module_item_id=24956228
     Accessed 2/17/2025
 */
-void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal) {
+void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal, int* signalNum) {
     pid_t spawnPid = -5;
     int childStatus;
+    int backgroundPids[100];
+    for(int i = 0; i < 100; i++){
+        backgroundPids[i] = 0;
+    }
+    int pidIndex = 0;
 
     // If fork is successful, child's spawnid = 0 and parent's spawnid = child's pid
     spawnPid = fork();
@@ -120,13 +125,33 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
         case -1:
             // If fork failed
             perror("fork() failed!");
+            exit(1);
             break;
         case 0:
             // spawnpid is 0 in the child
+
             // If argv has an output file, then redirect output
             if(command->output_file) {
                 // Open the file
                 int fileDesc = open(command->output_file, O_WRONLY | O_CREAT | O_TRUNC, 0640);
+                if (fileDesc == -1) {
+                    *exitStatus = 1;
+                    perror(command->output_file);
+                    exit(1);
+                }
+
+                // Redirect stdout to file
+                int result = dup2(fileDesc, 1);
+                if (result == -1) { 
+                    *exitStatus = 2;
+                    perror("source dup2()"); 
+                    exit(2); 
+                }
+            } else if(command->is_bg) {
+                // If there is no output redirection and command is in the background
+                // Redirect stdout to /dev/null
+                // Open the file
+                int fileDesc = open("/dev/null", O_WRONLY | O_CREAT | O_TRUNC, 0640);
                 if (fileDesc == -1) {
                     *exitStatus = 1;
                     perror(command->output_file);
@@ -159,6 +184,24 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
                     perror("source dup2()"); 
                     exit(2); 
                 }
+            } else if(command->is_bg) {
+                // If there is no input redirection and command is in the background
+                // Redirect stdout to /dev/null
+                // Open the file
+                int fileDesc = open("/dev/null", O_RDONLY, 0640);
+                if (fileDesc == -1) {
+                    *exitStatus = 1;
+                    perror(command->output_file);
+                    exit(1);
+                }
+
+                // Redirect stdout to file
+                int result = dup2(fileDesc, 0);
+                if (result == -1) { 
+                    *exitStatus = 2;
+                    perror("source dup2()"); 
+                    exit(2); 
+                }
             }
             
             // Run the new program in the child
@@ -174,12 +217,37 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
             // Wait for the child process to finish in the foreground
             if(!command->is_bg) {
                 spawnPid = waitpid(spawnPid, &childStatus, 0);
+            } else {
+                // If child process is started in the background
+                printf("background pid is %d", spawnPid);
+                fflush(stdout);
 
-                // If exited normally, set exitStatus
-                if(WIFEXITED(childStatus)) {
-                    *termBySignal = false;
-                    *exitStatus = WEXITSTATUS(childStatus);
+                // Add background pid to array
+                backgroundPids[pidIndex] = spawnPid;
+                pidIndex++;
+
+                // Check whether a child process has finished
+                int i = 0;
+                int bgPidStatus = 0;
+                while(backgroundPids[i]) {
+                    // If the pid has not exited, status is 0
+                    bgPidStatus = (backgroundPids[i], &childStatus, WNOHANG);
+                    // If the background process has terminated, print it
+                    if(bgPidStatus){
+                        printf("background pid %d is done: exit value %d", backgroundPids[i], *exitStatus);
+                        fflush(stdout);
+                    }
+                    i++;
                 }
+            }
+
+            // If exited normally, set exitStatus; else, set signalNum
+            if(WIFEXITED(childStatus)) {
+                *termBySignal = false;
+                *exitStatus = WEXITSTATUS(childStatus);
+            } else {
+                *termBySignal = true;
+                *signalNum = WTERMSIG(childStatus);
             }
             break;
     }
