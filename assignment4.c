@@ -232,10 +232,18 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
                 while(backgroundPids[i]) {
                     // If the pid has not exited, status is 0
                     bgPidStatus = (backgroundPids[i], &childStatus, WNOHANG);
-                    // If the background process has terminated, print it
+                    // If the background process has terminated, print it and remove from array
                     if(bgPidStatus){
                         printf("background pid %d is done: exit value %d\n", backgroundPids[i], *exitStatus);
                         fflush(stdout);
+                    }
+                    // Remove pid from array
+                    backgroundPids[i] = 0;
+                    // Shift other pids after deletion
+                    int j = i;
+                    while(backgroundPids[j]) {
+                        backgroundPids[j] = backgroundPids[j+1];
+                        j++;
                     }
                     i++;
                 }
