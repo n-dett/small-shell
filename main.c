@@ -4,7 +4,9 @@ int main() {
     struct commandLine *currentCommand;
     int zero = 0;
     int* exitStatus = &zero;
-    bool termBySignal = false;
+    int* signalNum = &zero;
+    bool falseValue = false;
+    bool* termBySignal = &falseValue;
 
     // Parse the user input
     while(true) {
@@ -20,10 +22,10 @@ int main() {
             // If current command is "cd"
             cdCommand(currentCommand);
         } else if(!strncmp(currentCommand->argv[0], "status", 6)) {
-            statusCommand(*exitStatus, termBySignal);
+            statusCommand(*exitStatus, *signalNum, *termBySignal);
         } else {
             // If not a built-in command, start a new process
-            newProcess(currentCommand, exitStatus);
+            newProcess(currentCommand, exitStatus, termBySignal);
         } 
     }
     

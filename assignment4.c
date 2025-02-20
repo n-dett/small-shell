@@ -78,14 +78,14 @@ void cdCommand(struct commandLine* command) {
 
 
 // Prints out either the exit status or the terminating signal of the last foreground process ran by your shell
-void statusCommand(int exitOrSignalNum, bool termBySignal) {
+void statusCommand(int exitNum, int signalNum, bool termBySignal) {
     if(!termBySignal) {
         // If printing exit status
-        printf("exit value %d\n", exitOrSignalNum);
+        printf("exit value %d\n", exitNum);
         fflush(stdout);
     } else {
         // If printing terminating signal
-        printf("terminated by signal %d", exitOrSignalNum);
+        printf("terminated by signal %d", signalNum);
         fflush(stdout);
     }
 }
@@ -107,7 +107,7 @@ void statusCommand(int exitOrSignalNum, bool termBySignal) {
     https://canvas.oregonstate.edu/courses/1987883/pages/exploration-processes-and-i-slash-o?module_item_id=24956228
     Accessed 2/17/2025
 */
-void newProcess(struct commandLine* command, int* exitStatus) {
+void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal) {
     pid_t spawnPid = -5;
     int childStatus;
 
@@ -172,19 +172,15 @@ void newProcess(struct commandLine* command, int* exitStatus) {
         default:
             // spawnpid is the pid of the child
             // Wait for the child process to finish in the foreground
-            //if(!command->is_bg) {
+            if(!command->is_bg) {
                 spawnPid = waitpid(spawnPid, &childStatus, 0);
 
+                // If exited normally, set exitStatus
                 if(WIFEXITED(childStatus)) {
+                    *termBySignal = false;
                     *exitStatus = WEXITSTATUS(childStatus);
                 }
-
-                // If childStatus is not 0, set exitStatus to 1
-                // if(childStatus) {
-                //     *exitStatus = 1;
-                // }
-
-            //}
+            }
             break;
     }
     
