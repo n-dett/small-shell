@@ -171,14 +171,20 @@ void newProcess(struct commandLine* command, int* exitStatus) {
             break;
         default:
             // spawnpid is the pid of the child
-            // Wait for the child process to finish
-            spawnPid = waitpid(spawnPid, &childStatus, 0);
+            // Wait for the child process to finish in the foreground
+            //if(!command->is_bg) {
+                spawnPid = waitpid(spawnPid, &childStatus, 0);
 
-            // If childStatus is not 0, set exitStatus to 1
-            if(childStatus != 0) {
-                *exitStatus = 1;
-            }
-            
+                if(WIFEXITED(childStatus)) {
+                    *exitStatus = WEXITSTATUS(childStatus);
+                }
+
+                // If childStatus is not 0, set exitStatus to 1
+                // if(childStatus) {
+                //     *exitStatus = 1;
+                // }
+
+            //}
             break;
     }
     
