@@ -219,7 +219,7 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
                 spawnPid = waitpid(spawnPid, &childStatus, 0);
             } else {
                 // If child process is started in the background
-                printf("background pid is %d", spawnPid);
+                printf("background pid is %d\n", spawnPid);
                 fflush(stdout);
 
                 // Add background pid to array
@@ -234,7 +234,7 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
                     bgPidStatus = (backgroundPids[i], &childStatus, WNOHANG);
                     // If the background process has terminated, print it
                     if(bgPidStatus){
-                        printf("background pid %d is done: exit value %d", backgroundPids[i], *exitStatus);
+                        printf("background pid %d is done: exit value %d\n", backgroundPids[i], *exitStatus);
                         fflush(stdout);
                     }
                     i++;
