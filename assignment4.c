@@ -106,15 +106,21 @@ void statusCommand(int exitNum, int signalNum, bool termBySignal) {
     Exploration: Processes and I/O
     https://canvas.oregonstate.edu/courses/1987883/pages/exploration-processes-and-i-slash-o?module_item_id=24956228
     Accessed 2/17/2025
+    and
+    Exploration: Signal Handling API
+    https://canvas.oregonstate.edu/courses/1987883/pages/exploration-signal-handling-api?module_item_id=24956227
+    Accessed 2/20/2025
 */
 void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal, int* signalNum) {
     pid_t spawnPid = -5;
     int childStatus;
-    int backgroundPids[100];
-    for(int i = 0; i < 100; i++){
-        backgroundPids[i] = 0;
-    }
+    int backgroundPids[100] = {0};
     int pidIndex = 0;
+
+    // Ignore SIGINT in parent and child
+    struct sigaction handleSIGINT = {0};
+    handleSIGINT.sa_handler = SIG_IGN;
+    sigaction(SIGINT, &handleSIGINT, NULL);
 
     // If fork is successful, child's spawnid = 0 and parent's spawnid = child's pid
     spawnPid = fork();
@@ -129,6 +135,12 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
             break;
         case 0:
             // spawnpid is 0 in the child
+
+            // If child process is in foreground, restore SIGINT functionality
+            if(!command->is_bg) {
+                handleSIGINT.sa_handler = SIG_DFL;
+                sigaction(SIGINT, &handleSIGINT, NULL); 
+            }
 
             // If argv has an output file, then redirect output
             if(command->output_file) {

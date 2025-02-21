@@ -9,6 +9,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <signal.h>
 #define INPUT_LENGTH 2048
 #define MAX_ARGS 512
 
