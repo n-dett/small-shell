@@ -118,9 +118,9 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
     int pidIndex = 0;
 
     // Ignore SIGINT in parent and child
-    struct sigaction handleSIGINT = {0};
-    handleSIGINT.sa_handler = SIG_IGN;
-    sigaction(SIGINT, &handleSIGINT, NULL);
+    struct sigaction SIGINT_action = {0};
+    SIGINT_action.sa_handler = SIG_IGN;
+    sigaction(SIGINT, &SIGINT_action, NULL);
 
     // If fork is successful, child's spawnid = 0 and parent's spawnid = child's pid
     spawnPid = fork();
@@ -138,8 +138,8 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
 
             // If child process is in foreground, restore SIGINT functionality
             if(!command->is_bg) {
-                handleSIGINT.sa_handler = SIG_DFL;
-                sigaction(SIGINT, &handleSIGINT, NULL); 
+                SIGINT_action.sa_handler = SIG_DFL;
+                sigaction(SIGINT, &SIGINT_action, NULL); 
             }
 
             // If argv has an output file, then redirect output
@@ -229,6 +229,14 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
             // Wait for the child process to finish in the foreground
             if(!command->is_bg) {
                 spawnPid = waitpid(spawnPid, &childStatus, 0);
+                // If exited normally, set exitStatus; else, set signalNum
+                if(WIFEXITED(childStatus)) {
+                    *termBySignal = false;
+                    *exitStatus = WEXITSTATUS(childStatus);
+                } else {
+                    *termBySignal = true;
+                    *signalNum = WTERMSIG(childStatus);
+                }
             } else {
                 // If child process is started in the background
                 printf("background pid is %d\n", spawnPid);
@@ -246,8 +254,20 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
                     bgPidStatus = (backgroundPids[i], &childStatus, WNOHANG);
                     // If the background process has terminated, print it and remove from array
                     if(bgPidStatus){
-                        printf("background pid %d is done: exit value %d\n", backgroundPids[i], *exitStatus);
-                        fflush(stdout);
+                        // If it terminated normally
+                        if(WIFEXITED(childStatus)) {
+                            *termBySignal = false;
+                            *exitStatus = WEXITSTATUS(childStatus);
+                            printf("background pid %d is done: exit value %d\n", backgroundPids[i], *exitStatus);
+                            fflush(stdout);
+                        } else {
+                            // If it was terminated by a signal
+                            *termBySignal = true;
+                            *signalNum = WTERMSIG(childStatus);
+                            printf("background pid %d is done: terminated by signal %d\n", backgroundPids[i], *signalNum);
+                            fflush(stdout);
+                        }
+
                     }
                     // Remove pid from array
                     backgroundPids[i] = 0;
@@ -261,16 +281,9 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
                 }
             }
 
-            // If exited normally, set exitStatus; else, set signalNum
-            if(WIFEXITED(childStatus)) {
-                *termBySignal = false;
-                *exitStatus = WEXITSTATUS(childStatus);
-            } else {
-                // print signal message here
-                *termBySignal = true;
-                *signalNum = WTERMSIG(childStatus);
-            }
+
             break;
     }
     
 }
+
