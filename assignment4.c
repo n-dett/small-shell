@@ -245,30 +245,31 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
                 // Add background pid to array
                 backgroundPids[pidIndex] = spawnPid;
                 pidIndex++;
+            }
 
-                // Check whether a child process has finished
-                int i = 0;
-                int bgPidStatus = 0;
-                while(backgroundPids[i]) {
-                    // If the pid has not exited, status is 0
-                    bgPidStatus = waitpid(backgroundPids[i], &childStatus, WNOHANG);
-                    // If the background process has terminated, print it and remove from array
-                    if(bgPidStatus){
-                        // If it terminated normally
-                        if(WIFEXITED(childStatus)) {
-                            *termBySignal = false;
-                            *exitStatus = WEXITSTATUS(childStatus);
-                            printf("background pid %d is done: exit value %d\n", backgroundPids[i], *exitStatus);
-                            fflush(stdout);
-                        } else {
-                            // If it was terminated by a signal
-                            *termBySignal = true;
-                            *signalNum = WTERMSIG(childStatus);
-                            printf("background pid %d is done: terminated by signal %d\n", backgroundPids[i], *signalNum);
-                            fflush(stdout);
-                        }
+            // Check whether a child process has finished
+            int i = 0;
+            int bgPidStatus = 0;
+            while(backgroundPids[i]) {
+                // If the pid has not exited, status is 0
+                bgPidStatus = waitpid(backgroundPids[i], &childStatus, WNOHANG);
 
+                // If the background process has terminated, print it and remove from array
+                if(bgPidStatus){
+                    // If process terminated normally
+                    if(WIFEXITED(childStatus)) {
+                        *termBySignal = false;
+                        *exitStatus = WEXITSTATUS(childStatus);
+                        printf("background pid %d is done: exit value %d\n", backgroundPids[i], *exitStatus);
+                        fflush(stdout);
+                    } else {
+                        // If process was terminated by a signal
+                        *termBySignal = true;
+                        *signalNum = WTERMSIG(childStatus);
+                        printf("background pid %d is done: terminated by signal %d\n", backgroundPids[i], *signalNum);
+                        fflush(stdout);                        
                     }
+
                     // Remove pid from array
                     backgroundPids[i] = 0;
                     // Shift other pids after deletion
@@ -277,10 +278,12 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
                         backgroundPids[j] = backgroundPids[j+1];
                         j++;
                     }
-                    i++;
-                }
-            }
 
+                    // Decrement index of next pid to be added
+                    pidIndex--;
+                }
+
+            }
 
             break;
     }
