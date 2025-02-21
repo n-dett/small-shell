@@ -251,7 +251,7 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
                 int bgPidStatus = 0;
                 while(backgroundPids[i]) {
                     // If the pid has not exited, status is 0
-                    bgPidStatus = (backgroundPids[i], &childStatus, WNOHANG);
+                    bgPidStatus = waitpid(backgroundPids[i], &childStatus, WNOHANG);
                     // If the background process has terminated, print it and remove from array
                     if(bgPidStatus){
                         // If it terminated normally
