@@ -115,7 +115,7 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
     pid_t spawnPid = -5;
     int childStatus;
     int backgroundPids[100] = {0};
-    int pidIndex = 0;
+    int pidCount = 0;
 
     // Ignore SIGINT in parent and child
     struct sigaction SIGINT_action = {0};
@@ -243,50 +243,45 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
                 fflush(stdout);
 
                 // Add background pid to array
-                backgroundPids[pidIndex] = spawnPid;
-                pidIndex++;
+                pidCount++;
+                backgroundPids[pidCount-1] = spawnPid;
+                
 
                 waitpid(spawnPid, &childStatus, WNOHANG);
             }
 
-            // // Check whether a child process has finished
-            // int i = 0;
-            // int bgPidTerm = 0;
-            // int bgPidStatus;
-            // while(backgroundPids[i]) {
-            //     // If the pid has not exited, status is 0
-            //     bgPidTerm = waitpid(backgroundPids[i], &bgPidStatus, WNOHANG);
 
-            //     // If the background process has terminated, print it and remove from array
-            //     if(bgPidTerm){
-            //         // If process terminated normally
-            //         if(WIFEXITED(bgPidStatus)) {
-            //             *termBySignal = false;
-            //             *exitStatus = WEXITSTATUS(bgPidStatus);
-            //             printf("background pid %d is done: exit value %d\n", backgroundPids[i], *exitStatus);
-            //             fflush(stdout);
-            //         } else {
-            //             // If process was terminated by a signal
-            //             *termBySignal = true;
-            //             *signalNum = WTERMSIG(bgPidStatus);
-            //             printf("background pid %d is done: terminated by signal %d\n", backgroundPids[i], *signalNum);
-            //             fflush(stdout);                        
-            //         }
+            // Check whether a bg child process has finished
+            int bgPidTerminated = 0;
+            int bgPidStatus;
+            for(int i = 0; i < 100; i++) {
+                // If the pid isn't 0, check to see if it has terminated
+                if(backgroundPids[i]) {
+                    // If the pid is terminated, status is not 0
+                    bgPidTerminated = waitpid(backgroundPids[i], &bgPidStatus, WNOHANG);
 
-            //         // Remove pid from array
-            //         backgroundPids[i] = 0;
-            //         // Shift other pids after deletion
-            //         int j = i;
-            //         while(backgroundPids[j]) {
-            //             backgroundPids[j] = backgroundPids[j+1];
-            //             j++;
-            //         }
+                    // If the background process has terminated, print it and remove from array
+                    if(bgPidTerminated){
+                        if(WIFEXITED(bgPidStatus)) {
+                            // If process terminated normally
+                            *termBySignal = false;
+                            *exitStatus = WEXITSTATUS(bgPidStatus);
+                            printf("background pid %d is done: exit value %d\n", backgroundPids[i], *exitStatus);
+                            fflush(stdout);
+                        } else {
+                            // If process was terminated by a signal
+                            *termBySignal = true;
+                            *signalNum = WTERMSIG(bgPidStatus);
+                            printf("background pid %d is done: terminated by signal %d\n", backgroundPids[i], *signalNum);
+                            fflush(stdout);                        
+                        }
 
-            //         // Decrement index of next pid to be added
-            //         pidIndex--;
-            //     }
+                        // Remove pid from array
+                        backgroundPids[i] = 0;
+                    }
+                }
 
-            // }
+            }
 
             break;
     }
