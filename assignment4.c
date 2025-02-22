@@ -111,16 +111,17 @@ void statusCommand(int exitNum, int signalNum, bool termBySignal) {
     https://canvas.oregonstate.edu/courses/1987883/pages/exploration-signal-handling-api?module_item_id=24956227
     Accessed 2/20/2025
 */
-void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal, int* signalNum) {
+void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal, int* signalNum, int backgroundPids[]) {
     pid_t spawnPid = -5;
     int childStatus;
-    int backgroundPids[100] = {0};
     int pidCount = 0;
+
 
     // Ignore SIGINT in parent and child
     struct sigaction SIGINT_action = {0};
     SIGINT_action.sa_handler = SIG_IGN;
     sigaction(SIGINT, &SIGINT_action, NULL);
+
 
     // If fork is successful, child's spawnid = 0 and parent's spawnid = child's pid
     spawnPid = fork();
@@ -246,42 +247,9 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
                 pidCount++;
                 backgroundPids[pidCount-1] = spawnPid;
                 
-
-                waitpid(spawnPid, &childStatus, WNOHANG);
+                waitpid(-1, &childStatus, WNOHANG);
             }
 
-
-            // Check whether a bg child process has finished
-            int bgPidTerminated = 0;
-            int bgPidStatus;
-            for(int i = 0; i < 100; i++) {
-                // If the pid isn't 0, check to see if it has terminated
-                if(backgroundPids[i]) {
-                    // If the pid is terminated, status is not 0
-                    bgPidTerminated = waitpid(backgroundPids[i], &bgPidStatus, WNOHANG);
-
-                    // If the background process has terminated, print it and remove from array
-                    if(bgPidTerminated){
-                        if(WIFEXITED(bgPidStatus)) {
-                            // If process terminated normally
-                            *termBySignal = false;
-                            *exitStatus = WEXITSTATUS(bgPidStatus);
-                            printf("background pid %d is done: exit value %d\n", backgroundPids[i], *exitStatus);
-                            fflush(stdout);
-                        } else {
-                            // If process was terminated by a signal
-                            *termBySignal = true;
-                            *signalNum = WTERMSIG(bgPidStatus);
-                            printf("background pid %d is done: terminated by signal %d\n", backgroundPids[i], *signalNum);
-                            fflush(stdout);                        
-                        }
-
-                        // Remove pid from array
-                        backgroundPids[i] = 0;
-                    }
-                }
-
-            }
 
             break;
     }

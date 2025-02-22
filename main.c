@@ -8,8 +8,13 @@ int main() {
     bool falseValue = false;
     bool* termBySignal = &falseValue;
 
-    // Parse the user input
+    int backgroundPids[100] = {0};
+    int bgPidTerminated = 0;
+    int bgPidStatus;
+
+
     while(true) {
+        // Parse the entered command
         currentCommand = parse_input();
 
         if(!currentCommand) {
@@ -25,9 +30,40 @@ int main() {
             statusCommand(*exitStatus, *signalNum, *termBySignal);
         } else {
             // If not a built-in command, start a new process
-            newProcess(currentCommand, exitStatus, termBySignal, signalNum);
+            newProcess(currentCommand, exitStatus, termBySignal, signalNum, backgroundPids);
         } 
+
+
+        // Check whether a bg child process has finished
+        for(int i = 0; i < 100; i++) {
+            // If the pid isn't 0, check to see if it has terminated
+            if(backgroundPids[i]) {
+                // If the pid is terminated, status is not 0
+                bgPidTerminated = waitpid(backgroundPids[i], &bgPidStatus, WNOHANG);
+
+                // If the background process has terminated, print it and remove from array
+                if(bgPidTerminated){
+                    if(WIFEXITED(bgPidStatus)) {
+                        // If process terminated normally
+                        *termBySignal = false;
+                        *exitStatus = WEXITSTATUS(bgPidStatus);
+                        printf("background pid %d is done: exit value %d\n", backgroundPids[i], *exitStatus);
+                        fflush(stdout);
+                    } else {
+                        // If process was terminated by a signal
+                        *termBySignal = true;
+                        *signalNum = WTERMSIG(bgPidStatus);
+                        printf("background pid %d is done: terminated by signal %d\n", backgroundPids[i], *signalNum);
+                        fflush(stdout);                        
+                    }
+
+                    // Remove pid from array
+                    backgroundPids[i] = 0;
+                }
+            }
+        }
     }
+
     
     return EXIT_SUCCESS;
 }
