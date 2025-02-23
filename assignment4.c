@@ -114,7 +114,7 @@ void statusCommand(int exitNum, int signalNum, bool termBySignal) {
 void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal, int* signalNum, int backgroundPids[]) {
     pid_t spawnPid = -5;
     int childStatus;
-    int pidCount = 0;
+    static int pidCount = 0;
 
 
     // Ignore SIGINT in parent and child
@@ -245,7 +245,7 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
 
                 // Add background pid to array
                 pidCount++;
-                backgroundPids[pidCount-1] = spawnPid;
+                backgroundPids[pidCount] = spawnPid;
                 
                 waitpid(-1, &childStatus, WNOHANG);
             }
