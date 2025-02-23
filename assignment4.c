@@ -1,5 +1,7 @@
 #include "assignment4.h"
 
+// Start not in fg only mode
+bool fgOnlyMode = false;
 
 /*
     commandLine function adapted from sample_parser.c in Programming Assignment 4: SMALLSH
@@ -39,7 +41,11 @@ struct commandLine *parse_input() {
         } else if(!strcmp(token,">")) {
             currentCommand->output_file = strdup(strtok(NULL," \n"));
         } else if(!strcmp(token,"&")) {
-            currentCommand->is_bg = true;
+            if(!fgOnlyMode){
+                currentCommand->is_bg = true;
+            } else {
+                currentCommand->is_bg = false;
+            }
         } else {
             currentCommand->argv[currentCommand->argc++] = strdup(token);
         }
@@ -138,6 +144,10 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
         case 0:
             // spawnpid is 0 in the child
 
+            // All children must ignore SIGTSTP
+            // Register ignore_action as the signal handler for SIGTSTP
+            sigaction(SIGTSTP, &ignore_action, NULL);
+
             // If child process is in foreground, restore SIGINT functionality
             if(!command->is_bg) {
                 ignore_action.sa_handler = SIG_DFL;
@@ -227,6 +237,14 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
             exit(1);
             break;
         default:
+            { // Change signal handling of SIGTSTP for the parent process
+            struct sigaction SIGTSTP_action = {0};
+            // Fill out the struct
+            SIGTSTP_action.sa_handler = handleSIGTSTP;
+            sigfillset(&SIGTSTP_action.sa_mask);
+            SIGTSTP_action.sa_flags = SA_RESTART;
+            sigaction(SIGTSTP, &SIGTSTP_action, NULL);
+
             // spawnpid is the pid of the child
             // Wait for the child process to finish in the foreground
             if(!command->is_bg) {
@@ -256,6 +274,24 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
 
 
             break;
+        }
     }
     
 }
+
+void handleSIGTSTP() {
+    if(!(fgOnlyMode)) {
+        fgOnlyMode = true;
+        char* message = "Entering foreground-only mode (& is now ignored)\n";
+        write(STDOUT_FILENO, message, 49);
+    } else {
+        fgOnlyMode = false;
+        char* message = "Exiting foreground-only mode\n";
+        write(STDOUT_FILENO, message, 29);
+    }
+}
+
+
+
+
+
