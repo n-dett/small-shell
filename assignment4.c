@@ -118,9 +118,10 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
 
 
     // Ignore SIGINT in parent and child
-    struct sigaction SIGINT_action = {0};
-    SIGINT_action.sa_handler = SIG_IGN;
-    sigaction(SIGINT, &SIGINT_action, NULL);
+    struct sigaction ignore_action = {0};
+    ignore_action.sa_handler = SIG_IGN;
+    // Register ignore_action as the signal handler for SIGINT
+    sigaction(SIGINT, &ignore_action, NULL);
 
 
     // If fork is successful, child's spawnid = 0 and parent's spawnid = child's pid
@@ -139,8 +140,8 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
 
             // If child process is in foreground, restore SIGINT functionality
             if(!command->is_bg) {
-                SIGINT_action.sa_handler = SIG_DFL;
-                sigaction(SIGINT, &SIGINT_action, NULL); 
+                ignore_action.sa_handler = SIG_DFL;
+                sigaction(SIGINT, &ignore_action, NULL); 
             }
 
             // If argv has an output file, then redirect output
@@ -237,6 +238,9 @@ void newProcess(struct commandLine* command, int* exitStatus, bool* termBySignal
                 } else {
                     *termBySignal = true;
                     *signalNum = WTERMSIG(childStatus);
+                    printf("terminated by signal %d\n", *signalNum);
+                    fflush(stdout);
+
                 }
             } else {
                 // If child process is started in the background
